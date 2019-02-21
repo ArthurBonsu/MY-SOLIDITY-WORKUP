@@ -1,0 +1,736 @@
+pragma solidity >=0.4.0 <0.6.0;
+//^0.4.18;
+
+    // showing the exchange of product between drugcontroller and certifier
+//Actually it is DrugDetails now
+interface Regulator{
+     function  sendescrow(address escrowparticipator, bytes32 escrowparticipatorname, uint escrowparticipatoramount, uint v) external;
+    function returnbackescrow (address _escrowvictimaddress, bytes32 _escrowvictimmame, uint _escrowvictimmoney, uint v) external; 
+     //LASTOWNER  WILL BE PAID HERE 
+      
+  function  claimPayment( uint256 amount, uint256 nonce, bytes  signature,address receipientaddress) external ;
+               //LASTOWNER WILL BE PAID HERE 
+    function signPayment(address recipient, uint amount,bytes32 nonce, address contractAddress) external; 
+  function deposit(address donator, address receipient, uint amount) external;
+    
+}
+ 
+contract EscrowComplianceCecker is Regulator {
+    
+    uint amountrequired = 20;
+    address   escrowownaddress;
+    uint escrowbalance =0;
+    uint value;
+    uint m;
+    uint256 usedNonces;
+    
+    
+    struct EscrowSentBack{
+        address     escrowvictimaddress;
+        bytes32     escrowvictimmame;
+        uint      escrowvictimmoney;
+        bytes32   escrowvictimtimestamp;
+         uint      escrowvictimcount;
+        
+        mapping (address => EscrowSentBack[]) escrowsetee;
+    }
+    
+    struct EscrowObtained{
+         address  escrowparticipantaddress;
+         bytes32  escrowparticipantname;
+         uint       escrowparticipantsinitialamountputin;
+         bytes32      escrowparticipanttimestamp;
+         uint            escrowparticipantcount;
+        
+       mapping (address => EscrowObtained[]) escrowobtainees;
+       
+    } 
+       EscrowObtained[] public proposals;
+       
+      
+     
+   EscrowObtained escrowobtainee;
+   EscrowSentBack escrowtees;
+    
+     constructor(uint _amountrequired, uint _balance ) public payable {
+        amountrequired = _amountrequired;
+        escrowbalance = _balance;
+        
+}
+
+     function sendescrow(address  escrowparticipator, bytes32 escrowparticipatorname, uint escrowparticipatoramount, uint v, EscrowObtained  storage pre) internal {
+ escrowobtainee.escrowobtainees;
+    
+  
+   escrowobtainee.escrowparticipantcount =v;
+   EscrowObtained storage p = pre;
+  m =escrowobtainee.escrowparticipantcount;
+     uint obtcounter = m++;
+    
+    escrowobtainee.escrowparticipantaddress= escrowparticipator;
+     escrowobtainee.escrowparticipantname=escrowparticipatorname;
+     
+        require(amountrequired <= escrowparticipatoramount, "This is not enough for escrow");
+     escrowobtainee.escrowparticipantsinitialamountputin =escrowparticipatoramount;
+     uint escrowedvaluesent = escrowobtainee.escrowparticipantsinitialamountputin;
+           
+      
+     // knownEntity[entityAddress];
+     //(entityStructs[rowNumber].entityAddress != entityAddress;
+     
+        
+                              
+              escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipantsinitialamountputin =escrowedvaluesent;   
+                          escrowbalance += escrowobtainee.escrowparticipantsinitialamountputin;
+ proposals.push(EscrowComplianceCecker.EscrowObtained({
+      escrowparticipantaddress: escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipantaddress,
+      escrowparticipantname:escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipantname,
+       escrowparticipantsinitialamountputin:escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipantsinitialamountputin,
+      escrowparticipanttimestamp:escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipanttimestamp,
+      escrowparticipantcount:escrowobtainee.escrowobtainees[escrowparticipator][obtcounter].escrowparticipantcount
+        // I HAVE TO ADD THE OTHER DETAILS
+ 
+            
+     
+ }));  
+           
+}
+//we have to receive latest escrow
+function returnbackescrow (address _escrowvictimaddress, bytes32 _escrowvictimmame, uint _escrowvictimmoney, uint v, EscrowSentBack  storage pre) internal{
+                uint      obtcounter;
+                uint  obtanothercounter;
+                
+                                  require(escrowobtainee.escrowobtainees[ escrowobtainee.escrowparticipantaddress][obtanothercounter].escrowparticipantaddress == _escrowvictimaddress);
+                                      
+   EscrowSentBack storage p = pre;
+  m =escrowtees.escrowvictimcount;
+     uint counter = m++;
+    escrowtees.escrowvictimaddress= _escrowvictimaddress;
+   escrowtees.escrowvictimmame=_escrowvictimmame;
+     escrowtees.escrowvictimmoney =_escrowvictimmoney;
+            
+     escrowtees.escrowobtainees[_escrowvictimaddress][counter].escrowvictimmoney = escrowobtainee.escrowobtainees[ escrowobtainee.escrowparticipantaddress][obtanothercounter].length(-1).escrowparticipantsinitialamountputin;
+      escrowtees[_escrowvictimaddress][counter].escrowvictimaddress =escrowobtainee.escrowobtainees[ escrowobtainee.escrowparticipantaddress][obtanothercounter].length(-1).escrowparticipantaddress; 
+   escrowtees[_escrowvictimaddress][counter]. escrowvictimtimestamp =now;
+   uint mymoney =   escrowtees[_escrowvictimaddress][counter].escrowvictimmoney;
+   address receipientaddress = escrowtees[_escrowvictimaddress][counter].escrowvictimaddress;
+    require(msg.sender == escrowownaddress);
+     msg.sender.transfer(mymoney);
+withdraw(mymoney);
+emit Sent(msg.sender, receipientaddress, mymoney);
+
+    
+   
+  p[counter].push(escrowtees[_escrowvictimaddress][counter]({
+      escrowvictimaddress:escrowtees[_escrowvictimaddress][counter].escrowvictimaddress,
+      escrowvictimmame: escrowtees[_escrowvictimaddress][counter].escrowvictimmame,
+       escrowvictimmoney:escrowtees[_escrowvictimaddress][counter].escrowvictimmoney,
+      escrowvictimtimestamp:escrowtees[_escrowvictimaddress][counter]. escrowvictimtimestamp,
+      escrowvictimcount:escrowtees[_escrowvictimaddress][counter].escrowvictimcount
+       // I HAVE TO ADD THE OTHER DETAILS
+  
+            
+     
+ }));  
+                                        
+
+    
+}
+ 
+  
+    function deposit(address donator, address receipient, uint amount){
+        
+         escrowbalance +=amount;
+         escrowownaddress =receipient;
+         
+    }
+     function withdraw(uint balanceamount){
+        require(balanceamount <= escrowbalance[msg.sender], "Insufficient balance.");
+         escrowbalance -=balanceamount;
+         
+         
+     }
+    
+     function balances(uint balence) returns (uint){
+                
+       return escrowbalance[balence];
+     }
+ event Sent(address from, address receipientaddress, uint amount);
+ 
+               
+   // THE NEW RECEIVER WILL USE THIS TO SIGN THE MESSAGE 
+ function signPayment(address recipient, uint amount,bytes32 nonce, address contractAddress, function() callback)   {
+       escrowownaddress = contractAddress;
+       
+bytes32 hash = "0x" + abi.soliditySHA3(
+["address", "uint256", "uint256", "address"],
+[recipient, amount, nonce, escrowownaddress]
+).toString("hex");
+ 
+ // web3.eth.personal.sign(hash, web3.eth.defaultAccount, callback);
+   
+        //      balances(uint balence);
+       
+   }
+   //for the escrowobtainedaddress = receipient address produce this amount
+   //for deleting index
+   //(entityList[entityStructs[entityAddress].listPointer] == entityAddress);
+   
+   
+   //WE WILL USE IT TO RETRIEVE INFORMATION FOR THE ESCROW SO THAT THE ESCROW CAN ALSO SEE 
+   //WHAT IS HAPPENING.
+    
+        
+        // THIS FUNCTION IS CALLED BY INDUSTRY; HE CLAIMS GOOD AFTER EXCHANGE;
+    function claimPayment( uint256 amount, uint256 nonce, bytes memory signature,address receipientaddress)
+public {
+require(!usedNonces[nonce]);
+usedNonces[nonce] = true;
+// this recreates the message that was signed on the client
+bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount,
+nonce, this)));
+require(recoverSigner(message, signature) == escrowownaddress);
+
+
+msg.sender.transfer(amount);
+withdraw(amount);
+emit Sent(msg.sender, receipientaddress, amount);
+
+}
+/// destroy the contract and reclaim the leftover funds.
+function kill() public {
+require(msg.sender == escrowownaddress);
+selfdestruct(msg.sender);
+}
+/// signature methods.
+function splitSignature(bytes memory sig)
+internal
+pure
+returns (uint8 v, bytes32 r, bytes32 s)
+{
+require(sig.length == 65);
+assembly {
+// first 32 bytes, after the length prefix.
+    
+    
+    
+r := mload(add(sig, 32))
+// second 32 bytes.
+s := mload(add(sig, 64))
+// final byte (first byte of the next 32 bytes).
+v := byte(0, mload(add(sig, 96)))
+}
+return (v, r, s);
+}
+// HERE IS WHERE RECOVER SIGNER IS PASSED TO HIM SO THAT HE CAN GET HIS MONEY
+function recoverSigner(bytes32 message, bytes memory sig)
+internal
+pure
+returns (address)
+{
+(uint8 v, bytes32 r, bytes32 s) = splitSignature(sig);
+return ecrecover(message, v, r, s);
+}
+/// builds a prefixed hash to mimic the behavior of eth_sign.
+function prefixed(bytes32 hash) internal pure returns (bytes32) {
+return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+}
+
+    
+    
+    
+    
+    
+    
+}
+    
+    
+    
+    
+    
+    
+contract Industry is EscrowComplianceCecker {
+// `TokenCreator` is a contract type that is defined below.
+// It is fine to reference it as long as it is not used
+// to create a new contract.
+
+
+
+bytes32 name;
+
+uint i;
+
+//This is the Processing Entitiy , whether farmer, manufacturer or sales
+    
+struct ProcessingEntity{
+    address currentowner;
+    address receiver;
+    uint256 publickey;
+    bytes32 currentownername;
+    bytes32 receivername;
+     uint256 currentownerprocessingfee;
+     bytes32 role;
+     uint balance;
+     bool hasdrug;
+     bool exchangpermission;
+     uint escrowamount;
+     address lastdestination;
+     address justhandedoveraddres;
+     bytes32 RFIDofdrugtobesent;
+     address  manufacturerofdrugstobesent;
+    mapping (address => ProcessingEntity) processingentities;
+
+     uint currentownerscount;
+    
+}
+ //This is the drug
+
+struct Drug{
+    address manufacturer;
+    address currentdrugpossessor;
+      bytes32 RFID;
+    
+      bytes32 drugname;
+      uint cost;
+     bytes32 temperature;
+     bytes32 concentration;
+     bytes32 location;
+     bytes32 drugquality;
+   
+  mapping (bytes32 => Drug) drugs;
+    uint numOfDrugCount;
+    
+}
+
+
+
+// This is the nuber of phases that has taken place 
+//We are tokenizing the process
+
+struct Processes{
+      address currentproces;
+      bytes32 timestamp;
+      bytes32 drugname;
+      uint numberofProcessingEntities;
+      
+     
+      bytes32 location;
+      address receipient;
+      uint escrowvalue;
+   
+   mapping (address => ProcessingEntity) Processingentities;
+     uint numOfProcesses;
+   mapping (uint => Processes) processbatch;
+   mapping (bytes32 => Drug[]) drugRFID;
+
+      }
+      
+
+Processes procedure;
+ProcessingEntity procent;
+Drug[] self;
+//This is the Industry's constructor
+constructor(bytes32  _name, address currentowners, uint c ) public {
+ i = c;
+   procent.currentownername = _name;
+     procent.currentowner = currentowners;
+
+procent.currentowner = msg.sender;
+
+}
+
+
+//Now we will engage the processing phase here 
+function newProcessingPhase (address  _sender, bytes32 _sendername,address _receipient, bytes32 receipientname,bytes32 _RFID, address _lastdestination, uint currentownerscounts, uint processesnumber,Processes storage pre)  internal  returns (uint numOfProcesseses) {
+ 
+   Processes storage p =pre;
+  procent.currentowner = _sender;
+  procent.currentownername = _sendername;
+  procent.receiver = _receipient;
+  procent.receivername = receipientname;
+  procent.lastdestination = _lastdestination;
+   self.RFID = _RFID;
+ uint numOfProcesses = processesnumber;
+  uint numOfDrugCount;
+  uint currentownerscount;
+            
+   
+      numOfProcesses=   procedure.numOfProcesses++;
+         numOfDrugCount = self.numOfDrugCount;
+   currentownerscount = currentownerscount++;
+
+      
+       
+      self[self.RFID][numOfDrugCount] = Drug[self.RFID][numOfDrugCount];
+ sendescrows( procent[currentownerscount].currentowner, procent[currentownerscount].currentownername, procent[currentownerscount].escrowamount);    
+      
+ p.drugRFID[self.RFID][p.numOfProcesses].push(self[self.RFID][numOfDrugCount]({
+      currentdrugpossessor: self[self.RFID][numOfDrugCount].currentdrugpossessor,
+      RFID: self[self.RFID][numOfDrugCount].RFID,
+      cost:self[self.RFID][numOfDrugCount].cost,
+      drugname:self[self.RFID][numOfDrugCount].drugname,
+      temperature:self[self.RFID][numOfDrugCount].temperature,
+       concentration:self[self.RFID][numOfDrugCount].concentration,
+        location:self[self.RFID][numOfDrugCount].location,
+         numOfDrugCount:self[self.RFID][numOfDrugCount].numOfDrugCount,
+         manufacturer: self[self.RFID][numOfDrugCount].manufacturer,
+         drugquality:self[self.RFID][numOfDrugCount].drugquality
+         // i have to ensure other details are kept
+      
+            
+     
+ }));  
+ 
+ 
+ p.drugRFID[self.RFID][p.numOfProcesses].push(procent[currentownerscount]({
+      currentowner: procent[self.RFID][currentownerscount].currentowner,
+      publickey: procent[self.RFID][currentownerscount].publickey,
+      currentownername:procent[self.RFID][currentownerscount].currentownername,
+      receiver:procent[self.RFID][currentownerscount].receiver,
+      receivername:procent[self.RFID][currentownerscount].receivername,
+      lastdestination:procent[self.RFID][currentownerscount].lastdestination,
+      role:procent[self.RFID][currentownerscount].role,
+      balance:procent[self.RFID][currentownerscount].balance,
+       escrowamount:procent[self.RFID][currentownerscount].escrowamount,
+        location:procent[self.RFID][currentownerscount].location,
+         justhandedoveraddres:procent[self.RFID][currentownerscount].justhandedoveraddres,
+         currentownerscount:procent[self.RFID][currentownerscount].currentownerscount,
+          RFIDofdrugtobesent:procent[self.RFID][currentownerscount].RFIDofdrugtobesent,
+          manufacturerofdrugstobesent:procent[self.RFID][currentownerscount].manufacturerofdrugstobesent,
+          currentownerprocessingfee:procent[self.RFID][currentownerscount].currentownerprocessingfee
+        // I HAVE TO ADD THE OTHER DETAILS
+  
+            
+     
+ }));  
+          
+     changecurrentownership(procent[currentownerscount].currentownername, procent[currentownerscount].receivername,procent[currentownerscount].receiver ,procent.currentowner[currentownerscount].currentownerprocessingfee);
+     
+   procent[currentownerscount].currentownerscount =   numOfProcesses;
+    checklastdestination(procent[currentownerscount].receiver,procent[currentownerscount].lastdestination, procent[currentownerscount].currentownerscount);
+    endphases( numOfDrugCount);
+        self[self.RFID][numOfDrugCount].numOfDrugCount =numOfDrugCount;
+    }
+
+function showDetails() public  {
+    //we have to console.log() it;
+//    console.log();
+}
+
+function providecustomerpermission(bool givepermit, bytes32 role, uint v,bytes32 _RFID) public {
+       procent.currentownerscount =v;
+  
+       i =procent.currentownerscount;
+ 
+        procent[i].role =role;
+         givepermit = false;
+         
+          
+    
+         require((givepermit) == true && procent[i].role== 'manufacturer', "Permission not given by manufacturer");
+         PrintTransactionDetails(_RFID);
+}
+  function( bool givepermit) {
+      return true;
+ }
+
+  function makeDeposit(address donationmaker, uint amount){
+            procent[i].currentowner = donationmaker;
+             require(amount <= procent[i].balance , "Insufficient balance.");
+             deposit(procent[i].currentowner,'',  amount);
+             procent[i].balance-=amount;
+          
+          
+      }
+
+
+ function DetectGoodsQuality(bytes32 _drugqaulity, uint z, uint f) public {
+       procent.currentownerscount =z;
+    self.numOfDrugCount =   f;
+  uint w = self.numOfDrugCount;
+   i =procent.currentownerscount;
+                   if(  self[w].temperature <= 0.5 *self[w].temperature && self[w].concentration <= 0.5 * self[w].concentration ){
+                       
+                        self[w].drugquality = "Moderately Low";
+                        
+                   }    
+                   else if (self[w].temperature <= 0.2 *self[w].temperature && self[w].concentration <= 0.2 * self[w].concentration){
+                       self[w].drugquality = "Below Standard";
+                   }
+                   else {
+                       self[w].drugquality = " Standard";
+                   }
+     
+ }
+ // This is where we get the whole the person from the industry's details
+ function getEntityDetails(){
+      
+     
+ }
+ // This is where we set the details of the industry person
+ function setEntityDetails(){
+     
+     
+ }
+  
+  function PrintTransactionDetails(bytes32 _RFID)  {
+    self.RFID =_RFID;
+     procedure.drugRFID[self.RFID][procedure.numOfProcesses];
+       
+      return ( procedure.drugRFID[self.RFID][procedure.numOfProcesses].currentowner,
+       
+    procedure.drugRFID[self.RFID][procedure.numOfProcesses].publickey,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].currentownername,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].receiver,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].receivername,
+       procedure.drugRFID[self.RFID][procedure.numOfProcesses].lastdestination,
+     procedure.drugRFID[self.RFID][procedure.numOfProcesses].role,
+       procedure.drugRFID[self.RFID][procedure.numOfProcesses].balance,
+       procedure.drugRFID[self.RFID][procedure.numOfProcesses].escrowamount,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].location,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].justhandedoveraddres,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].currentownerscount,
+        procedure.drugRFID[self.RFID][procedure.numOfProcesses].RFIDofdrugtobesent,
+          procedure.drugRFID[self.RFID][procedure.numOfProcesses].manufacturerofdrugstobesent,
+          procedure.drugRFID[self.RFID][procedure.numOfProcesses].currentownerprocessingfee,
+     
+     
+     
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].currentdrugpossessor,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].RFID,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].cost,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].drugname,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].temperature,
+      procedure.drugRFID[self.RFID][procedure.numOfProcesses].concentration,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].location,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].numOfDrugCount,
+         procedure.drugRFID[self.RFID][procedure.numOfProcesses].manufacturer,
+        procedure.drugRFID[self.RFID][procedure.numOfProcesses].drugquality
+  
+     
+       );
+      
+ 
+ 
+ 
+  }
+ 
+ //The industry person has to oblidge to an escrow by making a small deposit
+ function createEscrow(uint escrowvalue, uint balancers, uint h ) public {
+  procent.currentownerscount =h;
+  
+  
+  i =procent.currentownerscount;
+      procent[i].escrowamount = escrowvalue;
+       procent[i].escrowamount = 0.2 * procent[i].balance;
+       procent[i].balance-=procent[i].escrowamount;
+ 
+ }
+ 
+  function sendescrows(address escrowparticipator, bytes32 escrowparticipatorname, uint escrowparticipatoramount, uint v){
+   procent.currentownerscount =v;
+  
+       i =procent.currentownerscount;
+ 
+       procent[i].currentowner= escrowparticipator;
+      procent[i].currentownername=escrowparticipatorname;
+      procent[i].escrowamount =escrowparticipatoramount;
+        createEscrow(procent[i].currentowner,procent[i].currentownername,procent[i].escrowamount);  
+        sendescrow(procent[i].currentowner,procent[i].currentownername,procent[i].escrowamount);
+      
+      
+  }
+  
+ // This is where we check the last destination to see if the drug has arrived mostly at point of purchase
+ //In some cases different shops may buy assigning the last destination may be a bit tricky on that note
+ function checklastdestination(address _receiver,address _lastdestination, uint s) public {
+       procent.currentownerscount =s;
+          bool _lastdestinationreached = false;
+       i =procent.currentownerscount;
+         if(procent[i].receiver == procent[].lastdestination){
+              _lastdestinationreached = true;
+              PrintTransactionDetails();   
+         }
+ }
+ 
+ // We ensure that they verify so that we can show their details else escrow is launched;
+ function checksignature() public {
+     
+     
+ }
+ 
+
+   //For each phase end it makes an incrament for another drug possibly
+
+  function endphases(uint numOfDrugCounts)  public {
+        if(msg.sender == procent[i].lastdestination){
+            uint numOfDrugCount;
+         numOfDrugCount=        numOfDrugCounts;
+       self.numOfDrugCount = numOfDrugCount++;
+       return self.numOfDrugCount;
+             
+ }
+
+}
+
+ // Here is the place where we change ownership of the drug;
+   function  changecurrentownership (bytes32 newName, bytes32 oldName,address oldAddress, address newAddress,address _jushandedoveraddress,address manufactureraddress, bytes32 _RFID,  uint e,  bool haspackage, uint f, uint256 _currentownerprocessingfee)  public  {
+  procent.currentownerscount =e;
+    self.numOfDrugCount =   f;
+  uint w = self.numOfDrugCount;
+  self[w].manufacturer =manufactureraddress;
+  self[w].RFID = _RFID;
+  
+  
+  i =procent.currentownerscount;
+   procent[i].hasdrug = haspackage;    
+     uint _escrowvictimmoney;
+  procent[i].justhandedoveraddres =_jushandedoveraddress;
+      //Here is where we check to see if the mesage sender is really the person
+      //Here we have to add the drug, because the drug has to literally change hands;
+  if (msg.sender !=  procent[i].currentowner && procent[i].hasdrug==true) return;//This is optional
+                                      procent[i]=false;
+                                      
+       procent[i].currentownername = oldName;
+       procent[i].currentowner = oldAddress;
+        procent[i].currentownerprocessingfee = _currentownerprocessingfee;
+       procent[i].receiver = newName;
+       procent[i].receivername = newAddress;
+       
+      signPayment( procent[i].currentowner);
+      claimPayment( procent[i].currentownerprocessingfee,'','', procent[i].currentowner);
+                procent[i].balance+=  procent[i].currentownerprocessingfee;
+       returnbackescrow ( procent[i].currentowner, procent[i].currentownername,  _escrowvictimmoney);
+       procent[i].balance+=_escrowvictimmoney ;
+       
+      // returnbackescrow (procent[i].currentowner,  procent[i].currentownername); 
+     //LASTOWNER  WILL BE PAID HERE 
+     
+       
+        procent[i].currentownername =  procent.receivername[i] ;
+       procent[i].currentowner = procent.receiver[i];
+       procent[i].justhandedoveraddres = msg.sender;
+         procent[i].RFIDofdrugtobesent =  self[w].RFID;
+          procent[i].manufacturerofdrugstobesent = self[w].manufacturer;
+       procent[i].hasdrug = true; 
+       //This is optional
+       
+}
+
+ 
+
+    
+          
+     
+    //NOW WE HAVE TO BUILD IS TRANSFEROKAY
+
+
+}
+
+
+
+ contract Consumer is EscrowComplianceCecker  {
+   
+       struct Buyer {
+       string  name;
+       string age;
+       uint price;
+         address consumeraddress;
+      mapping (address => Buyer) buyers;
+
+       }
+       
+        
+       
+       
+        constructor(string names, string prices ) public {
+     Buyer.price = prices;
+}
+ 
+      //The setName and GetName function is just to ensure that we can do a 'lil' bit of proxy check
+      //So we dont give all the details away
+       function setName() public {
+          
+          
+          
+      }
+      
+      function getName() public {
+          
+      }
+      
+    
+      
+       function accessview() public{
+ //     Industry.providecustomerpermission(bool givepermit) external;
+ //      Industry.PrintTransactionDetails() external ;
+           
+           
+       }
+      function SetDetails() internal{}
+      
+      
+ 
+      function  getDetails() internal{
+          
+          
+      }
+      
+       
+     function verify(bytes32 _RFID)  public{
+           
+          Industry industrye = Industry();
+          industrye.providecustomerpermission(_RFID);
+         
+     }
+     
+      function checkverificationdone() public{
+          
+          
+      }
+
+       function viewManufacturerDetails() public{
+           
+           
+           
+       }
+        function createescrow() public {
+            
+            
+            
+        }
+
+
+
+
+
+
+}
+
+                                                                                             //#SignedByGod
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+  
+   
+   
+   
+   
+
